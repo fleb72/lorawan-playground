@@ -12,7 +12,7 @@ Ce projet collecte des données environnementales (température et humidité) vi
 - **Réseau** : LoRaWAN via TTN
 - **Webhook TTN** : `http://xx.xx.xx.xx:yyyy/ttn-uplink`
 - **Serveur** : FastAPI sur port `yyyy` (webhook) et `zzzz` (page web)
-- **Page Web** : `https://iot.techfleb.fr/latest?access=XXXXXX` (HTML dynamique, voir .env pour access)
+- **Page Web** : `https://iot[dot]techfleb[dot]fr/latest?access=XXXXXX` (HTML dynamique, voir .env pour access)
 - **Stockage** :
   - **InfluxDB 2** : écoute en local sur `tttt`, protection **Fail2ban**
   - **Accès public** : via **reverse proxy Nginx** sur `uuuu`, IP autorisées seulement
@@ -48,7 +48,7 @@ Ce projet utilise une carte **Heltec LoRa 32** pour transmettre les données d�
 - Lecture des données environnementales via le capteur **SHT31** (température et humidité RH)
 - Transmission LoRa vers **TTN** toutes les 12 minutes (5x par heure)
 - Stockage en base de données InfluxDB 2
-- Endpoint en HTTPS pour affichage des dernières mesures : `https://iot.techfleb.fr/latest?access=XXXXXX`, voir .env pour access 
+- Endpoint en HTTPS pour affichage des dernières mesures : `https://iot[dot]techfleb[dot]fr/latest?access=XXXXXX`, voir .env pour access 
 - Archivage quotidien des mesures en JSON à 00:00:00 UTC avec Object Storage S3
 
 ### 📁 Sources du programme Arduino
