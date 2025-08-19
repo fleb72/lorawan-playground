@@ -28,7 +28,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-load_dotenv('/home/perso/lora-ttn/.env')
+load_dotenv('/home/ubuntu/lora-ttn/.env')
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 
 # Configuration et connexion influxDB
@@ -70,10 +70,54 @@ def latest_data(request: Request):
 
     local_time = timestamp.astimezone(ZoneInfo("Europe/Paris"))
     formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S") if timestamp else "N/A"
+    last_temperature = values.get("temperature", "N/A")
+    last_humidity = values.get("humidity", "N/A")
+
+
+    query = f'''
+    from(bucket: "{bucket}")
+      |> range(start: -12h)
+      |> filter(fn: (r) => r._measurement == "lora_data")
+      |> filter(fn: (r) => r._field == "temperature" or r._field == "humidity")
+      |> aggregateWindow(every: 1h, fn: mean, createEmpty: false)
+      |> keep(columns: ["_time", "_field", "_value"])
+   '''
+
+    result = client.query_api().query(org=org, query=query)
+
+    points_temperature = []
+    points_humidity = []
+
+    for table in result:
+        for record in table.records:
+            local_time = record.get_time().astimezone(ZoneInfo("Europe/Paris"))
+            point = {
+                "x": local_time.isoformat(),
+                "y": record.get_value()
+            }
+            if record.get_field() == "temperature":
+                points_temperature.append(point)
+            elif record.get_field() == "humidity":
+                points_humidity.append(point)
+
+    #print(points_temperature)
+    #print()
+    #print(points_humidity)
+    """
+    last_date_str = points_temperature[-1]['x']
+    last_date_dt = datetime.fromisoformat(last_date_str)
+    last_date = last_date_dt.strftime('%Y-%m-%d  %H:%M:%S')
+
+    last_temperature = points_temperature[-1]['y']
+    last_humidity = points_humidity[-1]['y']
+    print(last_date, last_temperature, last_humidity)
+    """
 
     return templates.TemplateResponse("index.html", {
         "request": request,
         "formatted_time": formatted_time,
-        "temperature": values.get("temperature", "N/A"),
-        "humidity": values.get("humidity", "N/A")
+        "temperature": last_temperature,
+        "humidity": last_humidity,
+        "points_temperature": points_temperature,
+        "points_humidity": points_humidity
     })

@@ -1,7 +1,7 @@
 body {
   font-family: Arial, sans-serif; 
   margin: 0;
-  padding: 1rem;
+  padding: 0.5rem;
   background-color: #f0f0f0;
 }
 
@@ -9,9 +9,9 @@ body {
   max-width: 600px;
   margin: auto;
   background: white;
-  padding: 1rem;
+  padding: 0.5rem;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 
 h1 {
@@ -20,7 +20,7 @@ h1 {
 }
 
 p {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin: 0.5rem 0;
   display: flex;
   justify-content: space-between;
@@ -31,4 +31,14 @@ p {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+canvas {
+  width: 100%;
+  max-width: 600px;
+  height: 100%;
+  display: block;
+  margin: 5px auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
 }

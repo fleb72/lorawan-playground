@@ -3,15 +3,56 @@
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dernières valeurs</title>
+        <title>Météo Le Mans</title>
         <link rel="stylesheet" href="/static/style.css">
+	
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
       </head>
+
       <body>
         <div class="container">
-          <h1>Dernières mesures</h1>
+          <h1>Le Mans - Dernières mesures</h1>
           <p>🕒 Date/heure : {{ formatted_time }}</p>
           <p>🌡️ Température : {{ temperature }} °C</p>
           <p>💧 Humidité : {{ humidity }} %</p>
-        </div>
+
+	  <p style="font-size: 0.7em; color: #666; text-align: justify; margin-top: 20px;">
+	    <strong>Confidentialité&nbsp;:</strong>&nbsp;Cette page ne dépose aucun cookie, ne collecte aucune donnée personnelle, et ne réalise aucun suivi utilisateur. Aucune information n’est enregistrée ou utilisée à des fins d’identification.
+	  </p>
+	</div>
+
+	<div style="height: 250px;">  <canvas id="tempChart"></canvas>  </div>				
+	<div style="height: 250px;">   <canvas id="humidityChart"></canvas>  </div>		
+				
+	<script>
+		const dataPointsTemp = {{ points_temperature | tojson }};
+						
+            	const dataPointsHum = {{ points_humidity | tojson }};											
+	</script>
+				
+        <script src="/static/graph-common.js"> </script>	
+				
+	<script>
+		drawChart(
+				'tempChart',
+				dataPointsTemp,
+				'Température (°C)',
+				'rgba(255, 99, 132, 1)',
+				'Température (°C)',
+				"Moyenne horaire de la température sur les 12 dernières heures"
+			);
+
+		drawChart(
+				'humidityChart',
+				dataPointsHum,
+				'Humidité (%RH)',
+				'rgba(99, 132, 255, 1)',
+				'Humidité (%RH)',
+				"Moyenne horaire de l'humidité sur les 12 dernières heures"
+			);
+	</script>	
+
       </body>
     </html>
