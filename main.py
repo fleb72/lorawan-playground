@@ -100,18 +100,6 @@ def latest_data(request: Request):
             elif record.get_field() == "humidity":
                 points_humidity.append(point)
 
-    #print(points_temperature)
-    #print()
-    #print(points_humidity)
-    """
-    last_date_str = points_temperature[-1]['x']
-    last_date_dt = datetime.fromisoformat(last_date_str)
-    last_date = last_date_dt.strftime('%Y-%m-%d  %H:%M:%S')
-
-    last_temperature = points_temperature[-1]['y']
-    last_humidity = points_humidity[-1]['y']
-    print(last_date, last_temperature, last_humidity)
-    """
 
     return templates.TemplateResponse("index.html", {
         "request": request,
