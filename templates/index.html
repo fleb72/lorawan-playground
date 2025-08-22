@@ -14,9 +14,9 @@
       <body>
         <div class="container">
           <h1>Le Mans - Dernières mesures</h1>
-          <p>🕒 Date/heure : {{ formatted_time }}</p>
-          <p>🌡️ Température : {{ temperature }} °C</p>
-          <p>💧 Humidité : {{ humidity }} %</p>
+          <p>🕒 Date/heure : <span id="formatted_time"></span></p>
+          <p>🌡️ Température : <span id="temperature"></span> °C</p>
+          <p>💧 Humidité : <span id="humidity"></span> %</p>
 
 	  <p style="font-size: 0.7em; color: #666; text-align: justify; margin-top: 20px;">
 	    <strong>Confidentialité&nbsp;:</strong>&nbsp;Cette page ne dépose aucun cookie, ne collecte aucune donnée personnelle, et ne réalise aucun suivi utilisateur. Aucune information n’est enregistrée ou utilisée à des fins d’identification.
@@ -25,34 +25,58 @@
 
 	<div style="height: 250px;">  <canvas id="tempChart"></canvas>  </div>				
 	<div style="height: 250px;">   <canvas id="humidityChart"></canvas>  </div>		
-				
-	<script>
-		const dataPointsTemp = {{ points_temperature | tojson }};
-						
-            	const dataPointsHum = {{ points_humidity | tojson }};											
-	</script>
+	
 				
         <script src="/static/graph-common.js"> </script>	
 				
-	<script>
-		drawChart(
-				'tempChart',
-				dataPointsTemp,
-				'Température (°C)',
-				'rgba(255, 99, 132, 1)',
-				'Température (°C)',
-				"Moyenne horaire de la température sur les 12 dernières heures"
-			);
 
-		drawChart(
-				'humidityChart',
-				dataPointsHum,
-				'Humidité (%RH)',
-				'rgba(99, 132, 255, 1)',
-				'Humidité (%RH)',
-				"Moyenne horaire de l'humidité sur les 12 dernières heures"
-			);
-	</script>	
+	<script>
+		function fetchLatestData() {
+  			fetch("/api/latest-data")
+                                .then(response => {
+                                  if (!response.ok) {
+                                    throw new Error("Réponse HTTP non OK: " + response.status);
+                                  }
+                                  return response.json();
+                                })
+    				.then(data => {
+      				  // Met à jour les éléments HTML et les graphes
+      				  document.getElementById("temperature").textContent = data.temperature;
+      				  document.getElementById("humidity").textContent = data.humidity;
+      				  document.getElementById("formatted_time").textContent = data.formatted_time;
+
+                                  drawChart(
+                                    'tempChart',
+                                    data.points_temperature,
+                                    'Température (°C)',
+                                    'rgba(255, 99, 132, 1)',
+                                    'Température (°C)',
+                                    "Moyenne horaire de la température sur les 12 dernières heures"
+                                  );
+
+                                  drawChart(
+                                    'humidityChart',
+                                    data.points_humidity,
+                                    'Humidité (%RH)',
+                                    'rgba(99, 132, 255, 1)',
+                                    'Humidité (%RH)',
+                                    "Moyenne horaire de l'humidité sur les 12 dernières heures"
+                                  );
+
+    				})
+    				.catch(error => {
+      					console.error("Erreur lors du chargement des données :", error);
+    				});
+		}
+
+		// Appel initial
+		fetchLatestData();
+
+		// Rafraîchissement
+		setInterval(fetchLatestData, {{ interval }} * 1000);
+	</script>
+
+
 
       </body>
     </html>

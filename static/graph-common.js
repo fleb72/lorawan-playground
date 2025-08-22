@@ -1,6 +1,14 @@
+const chartInstances = {}; // Stocke les graphiques par canvasId
+
 function drawChart(canvasId, dataPoints, label, borderColor, yAxisLabel, chartTitle) {
   const ctx = document.getElementById(canvasId).getContext('2d');
-  new Chart(ctx, {
+  // Détruire l'ancien graphique s'il existe
+  if (chartInstances[canvasId]) {
+    chartInstances[canvasId].destroy();
+  }
+
+  // Créer le nouveau graphique et le stocker
+  chartInstances[canvasId] = new Chart(ctx, {
     type: 'line',
     data: {
       datasets: [{

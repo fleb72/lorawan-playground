@@ -10,22 +10,22 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.rest import ApiException
 
-import logging
-from logging.handlers import TimedRotatingFileHandler
+#import logging
+#from logging.handlers import TimedRotatingFileHandler
 
 from dotenv import load_dotenv
 import os
 
 
-# Connfiguration logger
-logger = logging.getLogger("mon_logger")
-logger.setLevel(logging.INFO)
+## Connfiguration logger
+#logger = logging.getLogger("mon_logger")
+#logger.setLevel(logging.INFO)
 
-handler = TimedRotatingFileHandler("log.txt", when="midnight", interval=1, backupCount=7)
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
+#handler = TimedRotatingFileHandler("log.txt", when="midnight", interval=1, backupCount=7)
+#formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+#handler.setFormatter(formatter)
 
-logger.addHandler(handler)
+#logger.addHandler(handler)
 
 
 load_dotenv('/home/ubuntu/lora-ttn/.env')
@@ -44,14 +44,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-
-# page HTML pour dernières mesures
-@app.get("/latest", response_class=HTMLResponse)
-def latest_data(request: Request):
-    token = request.query_params.get("access")
-    if token != ACCESS_TOKEN:
-        raise HTTPException(status_code=403, detail="Accès refusé")
-
+def update_latest():
     query = f'''
     from(bucket: "{bucket}")
       |> range(start: -1h)
@@ -73,7 +66,9 @@ def latest_data(request: Request):
     last_temperature = values.get("temperature", "N/A")
     last_humidity = values.get("humidity", "N/A")
 
+    return formatted_time, last_temperature, last_humidity
 
+def update_graphes():
     query = f'''
     from(bucket: "{bucket}")
       |> range(start: -12h)
@@ -100,12 +95,30 @@ def latest_data(request: Request):
             elif record.get_field() == "humidity":
                 points_humidity.append(point)
 
+    return points_temperature, points_humidity
+
+
+# page HTML pour dernières mesures
+@app.get("/latest", response_class=HTMLResponse)
+def latest_data(request: Request):
+    token = request.query_params.get("access")
+    if token != ACCESS_TOKEN:
+        raise HTTPException(status_code=403, detail="Accès refusé")
 
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "formatted_time": formatted_time,
+        "interval" : (12 * 60)	 #  Mise à jour toutes les 12 minutes
+    })
+
+@app.get("/api/latest-data")
+def get_latest_data():
+    last_formatted_time, last_temperature, last_humidity = update_latest()
+    points_temperature, points_humidity = update_graphes()
+
+    return {
         "temperature": last_temperature,
         "humidity": last_humidity,
+        "formatted_time": last_formatted_time,
         "points_temperature": points_temperature,
         "points_humidity": points_humidity
-    })
+    }
